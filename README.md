@@ -5,7 +5,7 @@ settled on the solution I sent. Nevertheless, I can still see plenty of room for
 fragment needs to include some indication of which queue it belongs to, as well as 
 other metadata for the segment: 
 [read offset(1byte)∣data count(1byte)∣next segment(2bytes)∣previous 
-segment(2bytes)∣segment owner(1byte)] — a total of 7 bytes. For example, it would 
+segment(2bytes)∣segment owner(1byte)] - a total of 7 bytes. For example, it would 
 be possible to remove both the read offset and the data count fields, but this would 
 require iterating through the entire segment to find the correct position for reading or 
 writing data. This would reduce computational performance but would allow more 
@@ -18,7 +18,8 @@ creating a new segment header. This would save 7 bytes of buffer space in that c
 The problem with this approach is that, if a segment becomes large enough, a 1-byte 
 data count would no longer be sufficient. Dynamically changing the segment header 
 size would also remove the uniform segment size, which is currently relied upon to 
-pack all segments tightly together. 
+pack all segments tightly together.
+3. It is possible to optimise both the segment headers and the queue headers. Currently, each segment position is stored using two bytes, but it would be possible to store positions using only one byte. This is possible because all segments have the same size, and the number of segments (the buffer size divided by the maximum segment size) is less than 256. This optimisation would significantly reduce memory usage - all queues would then occupy 192 bytes instead of 320 bytes.
 # Unit test
 I did not use a full-featured unit testing framework such as Google Test, as the interface of the system is relatively small. The queue manager exposes only four user-facing functions, which makes it practical to check correctness using a couple custom test functions.
 
